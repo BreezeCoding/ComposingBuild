@@ -1,0 +1,145 @@
+import com.studio.plugin.*
+
+android {
+    compileSdkVersion Version.compileSdkVersion
+    buildToolsVersion Version.buildToolsVersion
+
+    defaultConfig {
+        applicationId Version.applicationId
+        minSdkVersion Version.minSdkVersion
+        targetSdkVersion Version.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        flavorDimensions "versionCode"
+        flavorDimensions "versionName"
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a','x86'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
+            debuggable false
+            buildConfigField "Boolean","UrlConfig",project.URL_CONFIG
+            buildConfigField "Boolean","AdConfig",project.AD_CONFIG
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug{
+            debuggable = true
+            buildConfigField "Boolean","UrlConfig",project.URL_CONFIG
+            buildConfigField "Boolean","AdConfig",project.AD_CONFIG
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    productFlavors {
+        cn {
+            versionCode = Version.cnVersionCode
+            versionName = Version.cnVersionName
+        }
+
+        gp {
+            versionCode = Version.gpVersionCode
+            versionName = Version.gpVersionName
+        }
+    }
+}
+
+dependencies {
+    implementation Kotlin.kotlinVersion
+    implementation fileTree(dir: 'libs',includes: ['*.jar'])
+    implementation Android.appcompat
+    implementation Android.material
+    implementation Android.constraintLayout
+    testImplementation Android.junit
+    androidTestImplementation Android.junitTest
+    androidTestImplementation Android.espressoCore
+
+    // navigation
+    implementation (Android.fragmentKtx) {exclude group: 'androidx.navigation', module: "navigation-fragment"}
+    implementation Android.uiKtx
+    implementation Android.viewModelKtx
+    implementation Android.lifecycleService
+    implementation Android.coroutine
+    implementation Android.work_runtime
+    implementation Dependencies.binding
+    implementation Glide.glide
+    annotationProcessor Glide.glideAnnotation
+    implementation Glide.glideOkHttp
+    implementation Dependencies.BRVAH
+    implementation Dependencies.MMKV
+    implementation Dependencies.smartRefresh
+    implementation Dependencies.unPeekLiveData
+    implementation Dependencies.xxPermission
+    implementation Dependencies.lottie
+
+    implementation FileOperator.fileCore
+    implementation FileOperator.fileCoreCompat
+
+    implementation Dependencies.agentWeb
+    implementation Dependencies.litePal
+    implementation ExoPlayer.exoPlayerCore
+    implementation ExoPlayer.exoPlayerUi
+    implementation Dependencies.rxjava
+    implementation Dependencies.rxAndroid
+    implementation Dependencies.bannerViewPager
+    implementation DslTabLayout.dslTabLayout
+    implementation DslTabLayout.dslViewPager2Delegate
+    implementation Dependencies.liveEventBus
+    //  UMeng
+//    implementation Dependencies.common
+//    implementation Dependencies.asms
+    //  Ad
+//    implementation Dependencies.adMob
+//    implementation Dependencies.facebook
+//    implementation Dependencies.ironSource
+//    implementation Dependencies.googleBilling
+//    implementation Dependencies.downloader
+}
+
+//打包输出APK的文件名
+android.applicationVariants.all{ variant ->
+    variant.outputs.all{
+        def outputFileName = Version.appName
+        def date = new Date()
+        def formattedData = date.format('yyyyMMdd-HHmm')
+        def flavorName = productFlavors.name[0]
+        if (variant.buildType.name == 'debug') {
+            if (flavorName=="gp") {
+                variant.outputs.forEach {
+                    it.outputFileName = "${outputFileName}_${formattedData}_GP_debug_V${Version.gpVersionName}.apk"
+                }
+            } else {
+                variant.outputs.forEach {
+                    it.outputFileName = "${outputFileName}_${formattedData}_CN_debug_V${Version.cnVersionName}.apk"
+                }
+            }
+        } else if (variant.buildType.name == 'release') {
+            if (flavorName=="gp") {
+                variant.outputs.forEach {
+                    it.outputFileName = "${outputFileName}_${formattedData}_GP_release_V${Version.gpVersionName}.apk"
+                }
+            } else {
+                variant.outputs.forEach {
+                    it.outputFileName = "${outputFileName}_${formattedData}_CN_release_V${Version.cnVersionName}.apk"
+                }
+            }
+        }
+    }
+}
